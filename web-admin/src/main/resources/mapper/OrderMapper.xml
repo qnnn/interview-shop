@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kimi.my.shop.web.admin.dao.OrderDao">
+
+    <!-- sql片段 -->
+    <sql id="orderColumns">
+		a.id,
+        a.order_no,
+        a.product_id,
+        a.total_price,
+        a.number,
+        a.receiving_info_id,
+        a.pay_method,
+        a.tracking_no,
+        a.status,
+        a.created,
+        a.updated,
+        b.id AS "receivingInfo.id",
+        b.user_id AS "receivingInfo.userId",
+        b.user_location AS "receivingInfo.location",
+        b.user_address AS "receivingInfo.address",
+        b.user_message AS "receivingInfo.userMessage",
+        d.id AS "product.id",
+        d.name AS "product.name",
+        d.price AS "product.price",
+        e.id AS "receivingInfo.tbUser.id",
+        e.username AS "receivingInfo.tbUser.username",
+        e.phone AS "receivingInfo.tbUser.phone"
+	</sql>
+
+    <sql id="orderJoins">
+        LEFT JOIN tb_receiving_info AS b ON a.receiving_info_id = b.id
+        LEFT JOIN tb_product AS d ON a.product_id = d.id
+        LEFT JOIN tb_user AS e ON b.user_id = e.id
+    </sql>
+
+    <select id="selectAll" resultType="Order">
+        SELECT
+        <include refid="orderColumns" />
+        FROM
+        tb_order AS a
+        <include refid="orderJoins" />
+    </select>
+
+    <select id="getById" resultType="Order">
+        SELECT
+        <include refid="orderColumns" />
+        FROM
+        tb_order AS a
+        <include refid="orderJoins"/>
+        WHERE
+        a.id=#{id}
+
+    </select>
+
+    <update id="update">
+		UPDATE
+			tb_order
+		SET
+			`status` = #{status},
+            `tracking_no`= #{trackingNo},
+            `updated` = #{updated}
+		WHERE
+			id = #{id}
+	</update>
+
+    <select id="page" resultType="Order" parameterType="java.util.Map">
+        SELECT
+        <include refid="orderColumns" />
+        FROM
+        tb_order AS a
+        <include refid="orderJoins" />
+        <where>
+            <if test="pageParams.orderNo != null and pageParams.orderNo != ''">
+                AND a.order_no LIKE CONCAT ('%', #{pageParams.orderNo} ,'%')
+            </if>
+            <if test="pageParams.receivingInfo != null and pageParams.receivingInfo.tbUser.username !=''">
+                AND e.username LIKE CONCAT ('%', #{pageParams.receivingInfo.tbUser.username} ,'%')
+            </if>
+            <if test="pageParams.product != null and pageParams.product.name !=''">
+                AND d.name LIKE CONCAT ('%', #{pageParams.product.name} ,'%')
+            </if>
+        </where>
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM tb_order
+        AS a
+        <include refid="orderJoins"/>
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                AND a.order_no LIKE CONCAT ('%', #{orderNo} ,'%')
+            </if>
+            <if test="receivingInfo != null and receivingInfo.tbUser.username !=''">
+                AND e.username LIKE CONCAT ('%', #{receivingInfo.tbUser.username} ,'%')
+            </if>
+            <if test="product != null and product.name !=''">
+                AND d.name LIKE CONCAT ('%', #{product.name} ,'%')
+            </if>
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kimi.my.shop.web.admin.dao.ProductDao">
+
+    <!-- sql片段 -->
+    <sql id="productColumns">
+		a.id,
+        a.name,
+        a.img1,
+        a.img2,
+        a.img3,
+        a.img4,
+        a.describe,
+        a.category_id,
+        a.price,
+        a.sold_num,
+        a.stock_num,
+        a.created,
+        a.updated,
+        b.id AS "tbContentCategory.id",
+        b.name AS "tbContentCategory.name"
+	</sql>
+
+    <sql id="productJoins">
+        LEFT JOIN tb_content_category AS b ON a.category_id = b.id
+    </sql>
+
+    <select id="selectAll" resultType="Product">
+        SELECT
+        <include refid="productColumns" />
+        FROM
+        tb_product AS a
+        <include refid="productJoins" />
+    </select>
+
+    <insert id="insert">
+		INSERT INTO tb_product
+		 (
+		    `name`,
+		    `img1`,
+		    `img2`,
+		    `img3`,
+		    `img4`,
+		    `describe`,
+		    `category_id`,
+		    `price`,
+		    `sold_num`,
+		    `stock_num`
+		     )
+		VALUES
+		(
+		     #{name},
+		     #{img1},
+		     #{img2},
+		     #{img3},
+		     #{img4},
+		     #{describe},
+             #{tbContentCategory.id},
+		     #{price},
+             #{soldNum},
+             #{stockNum}
+		 );
+	</insert>
+
+    <delete id="delete">
+        DELETE from tb_product where id = #{id}
+    </delete>
+
+    <delete id="deleteMulti">
+		DELETE FROM tb_product
+        WHERE id IN
+        <foreach collection="array" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+	</delete>
+
+    <select id="getById" resultType="Product">
+        SELECT
+        <include refid="productColumns" />
+        FROM
+        tb_product AS a
+        <include refid="productJoins"/>
+        WHERE
+        a.id=#{id}
+
+    </select>
+
+    <update id="update">
+		UPDATE
+			tb_product
+		SET
+			`name` = #{name},
+            `img1`= #{img1},
+            `img2`= #{img2},
+            `img3`= #{img3},
+            `img4`= #{img4},
+            `describe` = #{describe},
+            `category_id` = #{tbContentCategory.id},
+            `price` = #{price},
+            `sold_num` = #{soldNum},
+            `stock_num` = #{stockNum},
+            `updated` = #{updated}
+		WHERE
+			id = #{id}
+	</update>
+
+    <select id="page" resultType="Product" parameterType="java.util.Map">
+        SELECT
+        <include refid="productColumns" />
+        FROM
+        tb_product AS a
+        <include refid="productJoins" />
+                <where>
+                    <if test="pageParams.tbContentCategory != null and pageParams.tbContentCategory.name != ''">
+                        AND b.name LIKE CONCAT ('%', #{pageParams.tbContentCategory.name} ,'%')
+                    </if>
+                    <if test="pageParams.name != null and pageParams.name !=''">
+                        AND a.name LIKE CONCAT ('%', #{pageParams.name} ,'%')
+                    </if>
+        <!--            <if test="pageParams.describe != null and pageParams.describe !=''">-->
+        <!--                AND a.describe LIKE CONCAT ('%', #{pageParams.describe} ,'%')-->
+        <!--            </if>-->
+                </where>
+        LIMIT #{start}, #{length}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM tb_product
+        AS a
+        <include refid="productJoins"/>
+        <where>
+            <if test="tbContentCategory != null and tbContentCategory.name !=''">
+                AND b.name LIKE CONCAT ('%', #{tbContentCategory.name} ,'%')
+            </if>
+            <if test="name != null and name != ''">
+                AND a.name LIKE CONCAT ('%', #{name} ,'%')
+            </if>
+<!--            <if test="describe != null and  describe !=''">-->
+<!--                AND a.describe LIKE CONCAT ('%', #{describe} ,'%')-->
+<!--            </if>-->
+        </where>
+    </select>
+</mapper>
