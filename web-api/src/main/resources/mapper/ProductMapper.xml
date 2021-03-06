@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kimi.my.shop.web.api.dao.ProductDao">
+
+    <sql id="productColumns">
+        a.id,
+        a.name,
+        a.img1,
+        a.img2,
+        a.img3,
+        a.img4,
+        a.describe,
+        a.category_id,
+        a.price,
+        a.sold_num,
+        a.stock_num,
+        a.created,
+        a.updated
+    </sql>
+
+    <select id="getProductCategories" resultType="TbContentCategory">
+        select id, name, status, is_parent
+        from tb_content_category
+        where
+        parent_id = (select id from tb_content_category where name = "商品分类")
+        order by sort_order desc
+    </select>
+
+    <select id="getTypeProducts" resultType="Product">
+        select
+        <include refid="productColumns"/>
+        from tb_product as a
+        where a.category_id = #{categoryId}
+    </select>
+
+    <select id="getProductInfo" resultType="Product">
+        select
+        <include refid="productColumns"/>
+        from tb_product as a
+        where a.id = #{id}
+    </select>
+</mapper>

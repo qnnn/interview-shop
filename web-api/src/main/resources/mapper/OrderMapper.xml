@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kimi.my.shop.web.api.dao.OrderDao">
+    <sql id="orderColumns">
+		a.id,
+        a.order_no,
+        a.product_id,
+        a.total_price,
+        a.number,
+        a.receiving_info_id,
+        a.pay_method,
+        a.tracking_no,
+        a.status,
+        a.created,
+        a.updated,
+        b.id AS "receivingInfo.id",
+        b.user_location AS "receivingInfo.location",
+        b.user_address AS "receivingInfo.address",
+        b.user_message AS "receivingInfo.userMessage",
+        d.id AS "product.id",
+        d.name AS "product.name",
+        d.img1 AS "product.img1",
+        d.price AS "product.price",
+        e.id AS "receivingInfo.tbUser.id",
+        e.username AS "receivingInfo.tbUser.username",
+        e.phone AS "receivingInfo.tbUser.phone"
+	</sql>
+
+    <sql id="orderJoins">
+        LEFT JOIN tb_receiving_info AS b ON a.receiving_info_id = b.id
+        LEFT JOIN tb_product AS d ON a.product_id = d.id
+        LEFT JOIN tb_user AS e ON b.user_id = e.id
+    </sql>
+
+    <!--根据状态显示订单列表-->
+    <select id="showOrderList" resultType="Order">
+        SELECT
+        <include refid="orderColumns" />
+        FROM
+        tb_order AS a
+        <include refid="orderJoins" />
+        WHERE
+            e.id = #{userId}
+        AND
+            a.status = #{status}
+    </select>
+    <!--根据订单状态status、订单号查询用户订单（同订单商品合并）-->
+    <select id="showOrderListByOrderNoAndUserId" resultType="Order">
+        SELECT
+        <include refid="orderColumns" />
+        FROM
+        tb_order AS a
+        <include refid="orderJoins" />
+        WHERE
+        e.id = #{userId}
+        AND
+        a.status = #{status}
+        AND
+        a.order_no = #{orderNo}
+    </select>
+    <!--根据订单状态status、订单号查询订单-->
+    <select id="showOrderListByOrderNoAndStatus" resultType="Order">
+        SELECT
+        <include refid="orderColumns" />
+        FROM
+        tb_order AS a
+        <include refid="orderJoins" />
+        WHERE
+        a.status = #{status}
+        AND
+        a.order_no = #{orderNo}
+    </select>
+    <!--更新商品已售数量-->
+    <update id="updateSoldNum">
+        update tb_product
+        set sold_num = sold_num + #{number}
+        where id = #{productId}
+    </update>
+    <!--更新商品库存数量-->
+    <update id="updateStockNum">
+        update tb_product
+        set stock_num = stock_num + #{number}
+        where id = #{productId}
+    </update>
+    <!--根据状态查询用户所有大订单-->
+    <select id="findOrderNo" resultType="String">
+        SELECT DISTINCT a.orderNo
+        FROM
+        tb_order AS a
+        <include refid="orderJoins" />
+        WHERE
+        e.id = #{userId}
+        AND
+        a.status = #{status}
+    </select>
+    <!--提交订单-插入订单表-->
+    <insert id="submitOrder" parameterType="Order">
+        insert into tb_order(order_no, product_id, total_price, `number`, receiving_info_id, pay_method, status)
+        values(#{orderNo}, #{product.id}, #{totalPrice}, #{number}, #{receivingInfo.id}, #{payMethod}, #{status})
+    </insert>
+    <!--收货信息表是否已经存在用户-->
+    <select id="findUserInReceivingInfo" resultType="ReceivingInfo">
+        select id, user_id as "tbUser.id", user_name as "tbUser.username", user_phone as "tbUser.phone", user_location, user_address, user_message
+        from tb_receiving_info
+        where user_id = #{userId}
+    </select>
+    <!--支付-插入用户收货信息-->
+    <insert id="addReceivingInfo">
+        insert into tb_receiving_info(user_id)
+        values(#{userId})
+    </insert>
+    <!--支付-更新用户收货信息-->
+    <update id="updateReceivingInfo" parameterType="ReceivingInfo">
+        update tb_receiving_info
+        set
+            user_name = #{tbUser.username},
+            user_phone = #{tbUser.phone},
+            user_location = #{location},
+            user_address = #{address},
+            user_message = #{userMessage}
+        where
+            id = #{id}
+    </update>
+    <!--支付-更新用户收货信息id-->
+    <update id="updateReceivingInfoId">
+        update tb_order
+        set receiving_info_id = #{receivingInfoId}
+        where order_no = #{orderNo}
+    </update>
+    <!--删除订单-->
+    <delete id="deleteOrder">
+        delete from tb_order
+        where order_no = #{orderNo}
+        and receiving_info_id = #{receivingInfoId}
+    </delete>
+    <!--支付-更新大订单状态-->
+    <update id="updateStatusByOrderNo">
+        update tb_order
+        set status = #{status}
+        where order_no = #{orderNo}
+    </update>
+    <!--支付-更新子订单状态-->
+    <update id="updateStatusById">
+        update tb_order
+        set status = #{status}
+        where id = #{id}
+        and receiving_info_id = #{receivingInfo.id}
+    </update>
+</mapper>
