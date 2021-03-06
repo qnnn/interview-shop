@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+<!--domain领域模型，类似entity-->
+    <parent>
+        <groupId>com.kimi</groupId>
+        <artifactId>dependencies</artifactId>
+        <version>1.0.0-SNAPSHOP</version>
+        <relativePath>../dependencies/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>domain</artifactId>
+    <packaging>jar</packaging>
+
+    <name>domain</name>
+    <description></description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.kimi</groupId>
+            <artifactId>commons</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
+    </dependencies>
+</project>
