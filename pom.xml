@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.kimi</groupId>
+    <artifactId>shop</artifactId>
+    <version>1.0.0-SNAPSHOP</version>
+    <packaging>pom</packaging>
+
+    <distributionManagement>
+<!--        <repository>-->
+<!--            <id>nexus-releases</id>-->
+<!--            <name>Nexus Release Repository</name>-->
+<!--            <url>http://192.168.229.147:8081/repository/maven-releases/</url>-->
+<!--        </repository>-->
+<!--        <snapshotRepository>-->
+<!--            <id>nexus-snapshots</id>-->
+<!--            <name>Nexus Snapshot Repository</name>-->
+<!--            <url>http://192.168.229.147:8081/repository/maven-snapshots/</url>-->
+<!--        </snapshotRepository>-->
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>11</java.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <encoding>UTF-8</encoding>
+    </properties>
+
+    <!--modules：模块-->
+    <modules>
+        <module>dependencies</module>
+        <module>commons</module>
+        <module>domain</module>
+        <module>web-admin</module>
+        <module>web-ui</module>
+        <module>web-api</module>
+    </modules>
+
+
+</project>
